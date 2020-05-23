@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Change</title>
+    <style>
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html {transition: 0.2s;}
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: '微軟正黑體', sans-serif;
+      }
+      .infoBar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 70vh;
+        padding: 0 10px;
+      }
+      .levelTitle {
+        margin: 10px 0;
+        transition: 0.2s;
+      }
+      .levelTitle::after, 
+      .title::after {
+        content: attr(data-level);
+        padding-left: 10px;
+        color: peru;
+      }
+      .lifeBar {
+        flex-grow: 1;
+        align-self: flex-end;
+        margin-left: 20px;
+        margin-bottom: 18px;
+        font-size: 0;
+      }
+      .life {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 5px;
+        opacity: 0.6;
+        border-radius: 50%;
+        background-color: forestgreen;
+        box-shadow: 0 0 5px forestgreen;
+      }
+      .life.dead {
+        background-color: tomato;
+        box-shadow: 0 0 5px tomato;
+      }
+      .mode {
+        position: relative;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+        border-radius: 50%;
+      }
+      .moon {
+        box-shadow: inset -5px -5px #333;
+      }
+      .sun {
+        background-color: goldenrod;
+        box-shadow: 0 0 3px 2px rgba(218, 165, 32, 0.5);
+      }
+      .mode::before {
+        content: attr(data-tip);
+        top: 50%;
+        left: -80px;
+        width: 80px;
+        padding: 3px 0;
+        transform: translate(-15px, -50%);
+        font-size: 12px;
+        font-weight: 700;
+        line-height: 1.6;
+        text-align: center;
+        border-radius: 3px;
+        background-color: rgba(175, 175, 175, 0.5);
+      }
+      .mode::after {
+        content: '';
+        top: 50%;
+        left: -8px;
+        width: 0;
+        height: 0;
+        transform: translate(-7px, -50%);
+        border-right: none;
+        border-left: 8px solid rgba(175, 175, 175, 0.5);
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+      }
+      .mode::before, 
+      .mode::after {
+        position: absolute;
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        transition: 0.2s;
+      }
+      .mode:hover::before, 
+      .mode:hover::after {
+        visibility: visible;
+        opacity: 1;
+      }
+      .gameBlock {
+        position: relative;
+      }
+      .gameStart ,
+      .colorPlate {
+        width: 70vh;
+        height: 70vh;
+        padding: 10px;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      .gameStart {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        top: 0;
+        left: 0;
+        border-color: transparent;
+        background-color: rgba(0, 0, 0, 0.95);
+      }
+      .gameStart .title {
+        margin-bottom: 4vh;
+        padding-left: 10px;
+        font-size: 4vh;
+        color: #F4F4F4;
+      }
+      .gameStart .btn {
+        cursor: pointer;
+        font-size: 2.3vh;
+        line-height: 2;
+        border: 1px solid #F4F4F4;
+        background-color: transparent;
+        color: #F4F4F4;
+      }
+      .gameStart .btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+      .colorPlate {
+        transition: 0.1s;
+        font-size: 0;
+        background-color: rgba(225, 225, 225, 0.1);
+      }
+      .colorPlate.wrong {
+        box-shadow: 0 0 15px -5px tomato;
+      }
+      .colorCard {
+        display: inline-block;
+        margin: 3px;
+        padding: 0;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      .timeBar {
+        width: calc(70vh + 22px);
+        height: 10px;
+        margin-top: 10px;
+        overflow: hidden;
+        border-radius: 5px;
+        background-color: rgba(125, 125, 125, 0.2);
+      }
+      .bar {
+        width: 0;
+        height: 100%;
+        background-color: tomato;
+        animation-name: barAni;
+        animation-duration: 5s;
+        animation-timing-function: linear;
+      }
+      @keyframes barAni {
+        0% {
+          width: 0;
+        }
+        100% {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="infoBar">
+      <h1 class="levelTitle" data-level="1">Level</h1>
+      <div class="lifeBar">
+        <div class="life"></div>
+        <div class="life"></div>
+        <div class="life"></div>
+      </div>
+      <div class="mode moon" data-tip="Dark Mode"></div>
+    </div>
+    <div class="gameBlock">
+      <div class="gameStart">
+        <h1 class="title" data-level="">尋找顏色不同的方塊</h1>
+        <button class="btn">START</button>
+      </div>
+      <div class="colorPlate"></div>
+      <div class="timeBar">
+      </div>
+    </div>
+  </body>
+  <script>
+    ;(function(){
+
+      // 建立遊戲物件
+      const Game = function(data, dom) {
+        // 選取器
+        [
+          this.colorCard, 
+          this.colorPlate, 
+          this.levelTitle, 
+          this.mode, 
+          this.lives, 
+          this.timeBar, 
+          this.gameStart
+        ] = dom;
+        // 各種變數
+        this.bestScore = JSON.parse(localStorage.getItem('colorChange')) || {score: 1};
+        this.level = 1;
+        this.life = this.lives.length;
+        this.blockNum = 0;
+        this.timeStop = true;
+        this.count;
+        this.keep;
+        this.colorCardHtml = data;
+      }
+      // 隨機範圍內數字
+      Game.prototype.randomNum = function(max, min = 0) {
+        return Math.floor(Math.random() * (max - min)) + min;
+      }
+      // 關卡的方塊數
+      Game.prototype.levelBlockNum = function(level) {
+        const blockNum = level < 80 ? Math.ceil(level / 10) + 2 : 10;
+        return blockNum * blockNum;
+      }
+      // 隨機顏色，並讓spacial的明度有變化
+      Game.prototype.randomColor = function(level) {
+        const hue = this.randomNum(360),
+          saturation = this.randomNum(80, 50),
+          lightness = this.randomNum(80, 50);
+        // 判斷明度的改變是要加還是減
+        const switchCheck = Math.floor(Math.random() + 0.5);
+        // 依 level 來判斷明度加減的程度
+        // const levelChangeValue = level < 99 ? Math.ceil((100 - level) / 10) : 1;
+        const levelChangeValue = 5;
+        // 明度變化
+        const lightnessSpecial = lightness + (switchCheck ? levelChangeValue : -levelChangeValue);
+        return [`hsl(${hue}, ${saturation}%, ${lightness}%)`, `hsl(${hue}, ${saturation}%, ${lightnessSpecial}%)`]; 
+      }
+      // 將arr做隨機排序處理
+      Game.prototype.randomInArr = function(arr, num) {
+        // 要裝排序好的空陣列
+        let arrReturn = [];
+        const random = this.randomNum(num);
+        // 迴圈，當 i === random 時，arrReturn 裝第二個，否則裝第一個
+        for (let i = 0; i < num; i++) {
+          switch (i) {
+            case random:
+              arrReturn.push(arr[1]);
+              break;
+            default:
+              arrReturn.push(arr[0]);
+          }
+        }
+        return arrReturn;
+      }
+      // 產生 html 的陣列並掛到 colorPlate 上
+      Game.prototype.htmlCreate = function() {
+        this.blockNum = this.levelBlockNum(this.level);
+        const colorHtml = this.randomInArr(this.colorCardHtml, this.blockNum);
+        this.colorPlate.innerHTML = colorHtml.join('');
+      }
+      // 依關卡改變 colorCard 顏色跟大小
+      Game.prototype.colorCardUpdate = function() {
+        // blockNum開根號
+        const blockNumSqrt = Math.sqrt(this.blockNum);
+        // colorPlate的寬高除以blockNumSqrt減掉colorCard的margin
+        const colorCardSize = `calc((70vh / ${blockNumSqrt}) - 6px)`;
+        const color = this.randomColor(this.level);
+        const colorCards = document.querySelectorAll(this.colorCard);
+        colorCards.forEach((colorCard) => {
+          colorCard.style.setProperty('width', colorCardSize);
+          colorCard.style.setProperty('height', colorCardSize);
+          colorCard.style.setProperty('background-color', color[0]);
+          if (colorCard.className.search('special') !== -1) colorCard.style.setProperty('background-color', color[1]);
+        })
+      }
+      // 夜間模式切換
+      Game.prototype.modeSwitch = function(e) {
+        // 抓到html跟levelTitle
+        const htmlStyle = document.documentElement.style;
+        const titleStyle = this.levelTitle.style;
+        const bgc = ['#F4F4F4', '#333333'];
+        // 日，夜間模式的判斷與動作
+        if (e.currentTarget.className.search('moon') !== -1) {
+          e.currentTarget.className = 'mode sun';
+          e.currentTarget.dataset.tip = 'Light Mode';
+          htmlStyle.setProperty('background-color', bgc[1]);
+          titleStyle.setProperty('color', bgc[0]);
+        } else {
+          e.currentTarget.className = 'mode moon';
+          e.currentTarget.dataset.tip = 'Dark Mode';
+          htmlStyle.setProperty('background-color', bgc[0]);
+          titleStyle.setProperty('color', bgc[1]);
+        }
+      }
+      // 替換time bar
+      Game.prototype.restartTimeBar = function() {
+        // 複製一個bar，讓新bar取代舊bar，使之更新動畫
+        const bar = this.timeBar.childNodes[1];
+        if (!bar) return;
+        const newBar = bar.cloneNode(true);
+        bar.parentNode.replaceChild(newBar, bar);
+      }
+      // 命-1並更新lifeBar
+      Game.prototype.lifeDead = function() {
+        this.life--;
+        this.lives[this.life].classList.add('dead');
+        // 讓外框出現紅色
+        this.colorPlate.classList.add('wrong');
+        this.colorPlate.addEventListener('transitionend', (e) => {
+          if (!e.propertyName === 'box-shadow') return;
+          this.colorPlate.classList.remove('wrong');
+        })
+      }
+      // 遊戲失敗時
+      Game.prototype.changeFail = function() {
+        // 最佳成績
+        if (this.level > this.bestScore.score) {
+          this.bestScore.score = this.level;
+          localStorage.setItem('colorChange' , JSON.stringify(this.bestScore));
+        }
+        // 讓restart畫面顯示出來
+        this.gameStart.style.setProperty('display', 'flex');
+        this.gameStart.childNodes[1].dataset.level = this.bestScore.score;
+        this.gameStart.childNodes[1].textContent = 'Best Score';
+        this.gameStart.childNodes[3].textContent = 'RESTART';
+        // 刪除bar
+        const bar = this.timeBar.childNodes[1];
+        if (bar) bar.parentNode.removeChild(bar);
+        // 把 life 數還原
+        this.lives.forEach((life) => life.classList.remove('dead'));
+      }
+      // 計時器，5秒沒點擊時遊戲失敗
+      Game.prototype.countDown = function() {
+        // 計時器執行的內容
+        const timeUpdate = () => {
+          if (this.life <= 1) {
+            this.changeFail();
+            return;
+          };
+          this.restartTimeBar();
+          this.lifeDead();
+          // 如果this.timeStop是false時，再執行計時器一次
+          if (!this.timeStop) this.count = setTimeout(timeUpdate, 5000);
+        };
+        // 把計時器裝進去 this.count
+        this.count = setTimeout(timeUpdate, 5000);
+      }
+      // 創造遊戲
+      Game.prototype.gameCreate = function() {
+        // 更新levelTitle的關卡數字
+        this.levelTitle.dataset.level = this.level;
+        // 如果過5秒沒更新遊戲，那就把this.timeStop變成false
+        clearTimeout(this.keep);
+        this.timeStop = true;
+        this.keep = setTimeout(()=>{this.timeStop = false;}, 4999);
+        // 產生方塊的html
+        this.htmlCreate();
+        this.colorCardUpdate();
+        // 把上個計時器停止再開始
+        clearTimeout(this.count);
+        this.countDown();
+        // 點及觸發事件
+        const colorCards = document.querySelectorAll(this.colorCard);
+        colorCards.forEach((colorCard) => {
+          colorCard.addEventListener('click', () => this.clickColor(colorCard));
+        })
+      }
+      // 按到色塊時的事件
+      Game.prototype.clickColor = function(colorCard) {
+        // 判斷按的方塊對不對
+        if (colorCard.dataset.correct === 'true') {
+          // 正確時關卡數+1，並且再次創造遊戲
+          this.level++;
+          this.gameCreate();
+          this.restartTimeBar();
+        } else if (colorCard.dataset.correct === 'false') {
+          // 錯誤時少一條命直到沒命
+          this.lifeDead();
+          // 呼叫遊戲失敗畫面
+          if (this.life <= 0) this.changeFail();
+        };
+      }
+      // 按到遊戲開始的執行
+      Game.prototype.start = function() {
+        // 遊戲start區塊消失
+        this.gameStart.style.setProperty('display', 'none');
+        // 創造time bar
+        const bar = document.createElement('div');
+        bar.className = 'bar';
+        this.timeBar.appendChild(bar);
+        // 創造遊戲
+        this.level = 1;
+        this.life = this.lives.length;
+        this.gameCreate();
+      }
+      // 按下按鈕後開始遊戲
+      Game.prototype.preStart = function() {
+        // 讓切換日夜間模式作用
+        this.mode.addEventListener('click', e => this.modeSwitch(e));
+        // 按下start按鈕時開始遊戲
+        this.gameStart.childNodes[3].addEventListener('click', () => game.start())
+      }
+
+      // 資料與dom與遊戲開始
+      const domList = [
+        '.colorCard', 
+        document.querySelector('.colorPlate'), 
+        document.querySelector('.levelTitle'), 
+        document.querySelector('.mode'), 
+        document.querySelectorAll('.life'), 
+        document.querySelector('.timeBar'), 
+        document.querySelector('.gameStart')
+      ];
+      const gameData = [
+        '<div class="colorCard" data-correct="false"></div>', 
+        '<div class="colorCard special" data-correct="true"></div>'
+      ];
+      const game = new Game(gameData, domList);
+      game.preStart();
+
+    })()
+
+    // 為什麼level數會累加? // 可能是因為直接用colorPlate去偵測e.target導致的錯誤
+    // 為什麼有時候按下去不會取消bar的動畫? // 直接add/remove class可能有些瑕疵，把bar刪除再增加效果會更好
+    // 為什麼刪除增加bar的動畫class不能直接放在clickColor裡? // 可以，但一樣會產生出上面的問題，並且要注意擺放位置
+
+    // 練習物件導向、localStorage的存取、childNodes編輯抓取
+  </script>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      html, body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: sans-serif;
+        background-color: #F4F4F4;
+      }
+      .gameBlock h1::after {
+        content: attr(data-level);
+        padding-left: 10px;
+        color: peru;
+      }
+      .colorPlate {
+        width: 400px;
+        height: 400px;
+        padding: 10px;
+        font-size: 0;
+        border-radius: 5px;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        background-color: rgba(225, 225, 225, 0.1);
+      }
+      .colorCard {
+        display: inline-block;
+        margin: 3px;
+        padding: 0;
+        border-radius: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="gameBlock">
+      <h1 data-level="1">Level</h1>
+      <div class="colorPlate"></div>
+    </div>
+  </body>
+  <script>
+    // 各種變數
+    const gameLevel = document.querySelector('.gameBlock h1');
+    const colorPlate = document.querySelector('.colorPlate');
+    const colorCardHtml = ['<div class="colorCard"></div>', '<div class="colorCard special" data-click="true"></div>'];
+    let level = 1;
+
+    // 隨機範圍內數字
+    function randomNum(max, min = 0) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+    // 關卡的方塊數
+    function levelBlockNum(level) {
+      const blockNum = Math.ceil(level / 10) + 2;
+      return blockNum * blockNum;
+    }
+    // 隨機顏色，並讓spacial的明度有變化
+    function randomColor(level) {
+      const hue = randomNum(360),
+        saturation = randomNum(80, 50),
+        lightness = randomNum(80, 50);
+      // 判斷明度的改變是要加還是減
+      const switchCheck = Math.floor(Math.random() + 0.5);
+      // 依 level 來判斷明度加減的程度
+      // const levelChangeValue = level < 99 ? Math.ceil((100 - level) / 10) : 1;
+      const levelChangeValue = 5;
+      // 明度變化
+      const lightnessSpecial = lightness + (switchCheck ? levelChangeValue : -levelChangeValue);
+      return [`hsl(${hue}, ${saturation}%, ${lightness}%)`, `hsl(${hue}, ${saturation}%, ${lightnessSpecial}%)`]; 
+    }
+    // 將arr做隨機排序處理
+    function randomInArr(arr, num) {
+      // 要裝排序好的空陣列
+      let arrReturn = [];
+      const random = randomNum(num);
+      // 迴圈，當 i === random 時，arrReturn 裝第二個，否則裝第一個
+      for (let i = 0; i < num; i++) {
+        switch (i) {
+          case random:
+            arrReturn.push(arr[1]);
+            break;
+          default:
+            arrReturn.push(arr[0]);
+        }
+      }
+      return arrReturn;
+    }
+    // 產生 html 的陣列並掛到 colorPlate 上
+    function htmlCreate() {
+      const blockNum = levelBlockNum(level);
+      const colorHtml = randomInArr(colorCardHtml, blockNum);
+      colorPlate.innerHTML = colorHtml.join('');
+      return blockNum;
+    }
+    // 依關卡改變 colorCard 顏色跟大小
+    function colorCardUpdate(num) {
+      const colorCard = document.querySelectorAll('.colorCard');
+      const blockNumSqrt = Math.sqrt(num); // blockNum開根號
+      const colorCardSize = Math.floor((400 / blockNumSqrt) - (3 * 2)) + 'px'; // colorPlate的寬高除以blockNumSqrt減掉colorCard的margin
+      const color = randomColor(level);
+      colorCard.forEach((dom) => {
+        dom.style.setProperty('width', colorCardSize);
+        dom.style.setProperty('height', colorCardSize);
+        dom.style.setProperty('background-color', color[0]);
+        if (dom.className.search('special') !== -1) dom.style.setProperty('background-color', color[1]);
+      })
+    }
+
+    htmlCreate();
+    colorCardUpdate(htmlCreate());
+
+    // 按到正確的color時的事件
+    function correctColor(e) {
+      if (!e.target.dataset.click) return;
+      level++
+      gameLevel.dataset.level = level;
+      htmlCreate();
+      colorCardUpdate(htmlCreate());
+    }
+    // 嘗試按對噴true
+    colorPlate.addEventListener('click', correctColor);
+  </script>
+</html>
