@@ -324,7 +324,7 @@
         // colorPlate的寬高除以blockNumSqrt減掉colorCard的margin
         const colorCardSize = `calc((100% / ${blockNumSqrt}) - 6px)`;
         const color = this.randomColor(this.level);
-        const colorCards = document.querySelectorAll(this.colorCard);
+        let colorCards = document.querySelectorAll(this.colorCard);
         colorCards.forEach((colorCard) => {
           colorCard.style.setProperty('width', colorCardSize);
           colorCard.style.setProperty('height', colorCardSize);
@@ -335,8 +335,8 @@
       // 夜間模式切換
       Game.prototype.modeSwitch = function(e) {
         // 抓到html跟levelTitle
-        const htmlStyle = document.documentElement.style;
-        const titleStyle = this.levelTitle.style;
+        let htmlStyle = document.documentElement.style;
+        let titleStyle = this.levelTitle.style;
         const bgc = ['#F4F4F4', '#333333'];
         // 日，夜間模式的判斷與動作
         if (e.currentTarget.className.search('moon') !== -1) {
@@ -354,9 +354,9 @@
       // 替換time bar
       Game.prototype.restartTimeBar = function() {
         // 複製一個bar，讓新bar取代舊bar，使之更新動畫
-        const bar = this.timeBar.childNodes[1];
+        let bar = this.timeBar.childNodes[1];
         if (!bar) return;
-        const newBar = bar.cloneNode(true);
+        let newBar = bar.cloneNode(true);
         bar.parentNode.replaceChild(newBar, bar);
       }
       // 命-1並更新lifeBar
@@ -383,7 +383,7 @@
         this.gameStart.childNodes[1].textContent = 'Best Score';
         this.gameStart.childNodes[3].textContent = 'RESTART';
         // 刪除bar
-        const bar = this.timeBar.childNodes[1];
+        let bar = this.timeBar.childNodes[1];
         bar && bar.parentNode.removeChild(bar);
         // 把 life 數還原
         this.lives.forEach((life) => life.classList.remove('dead'));
@@ -419,7 +419,7 @@
         clearTimeout(this.count);
         this.countDown();
         // 點及觸發事件
-        const colorCards = document.querySelectorAll(this.colorCard);
+        let colorCards = document.querySelectorAll(this.colorCard);
         colorCards.forEach((colorCard) => {
           colorCard.addEventListener('click', () => this.clickColor(colorCard));
         })
@@ -444,7 +444,7 @@
         // 遊戲start區塊消失
         this.gameStart.style.setProperty('display', 'none');
         // 創造time bar
-        const bar = document.createElement('div');
+        let bar = document.createElement('div');
         bar.className = 'bar';
         this.timeBar.appendChild(bar);
         // 創造遊戲
