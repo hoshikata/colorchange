@@ -12,7 +12,10 @@
         padding: 0;
         box-sizing: border-box;
       }
-      html {transition: 0.2s;}
+      html {
+        transition: 0.2s;
+        font-size: 14px;
+      }
       body {
         display: flex;
         flex-direction: column;
@@ -29,7 +32,9 @@
       }
       .levelTitle {
         margin: 10px 0;
+        padding: 0;
         transition: 0.2s;
+        font-size: 2rem;
       }
       .levelTitle::after, 
       .title::after {
@@ -41,13 +46,13 @@
         flex-grow: 1;
         align-self: flex-end;
         margin-left: 20px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
         font-size: 0;
       }
       .life {
         display: inline-block;
         width: 10px;
-        height: 10px;
+        padding-top: 10px;
         margin-right: 5px;
         opacity: 0.6;
         border-radius: 50%;
@@ -61,7 +66,7 @@
       .mode {
         position: relative;
         width: 20px;
-        height: 20px;
+        padding-top: 20px;
         cursor: pointer;
         transition: 0.2s;
         border-radius: 50%;
@@ -80,7 +85,7 @@
         width: 80px;
         padding: 3px 0;
         transform: translate(-15px, -50%);
-        font-size: 12px;
+        font-size: 0.85rem;
         font-weight: 700;
         line-height: 1.6;
         text-align: center;
@@ -135,14 +140,14 @@
         background-color: rgba(0, 0, 0, 0.95);
       }
       .gameStart .title {
-        margin-bottom: 4vh;
+        margin-bottom: 1.8rem;
         padding-left: 10px;
-        font-size: 4vh;
+        font-size: 1.8rem;
         color: #F4F4F4;
       }
       .gameStart .btn {
         cursor: pointer;
-        font-size: 2.3vh;
+        font-size: 0.9rem;
         line-height: 2;
         border: 1px solid #F4F4F4;
         background-color: transparent;
@@ -167,7 +172,7 @@
         border-radius: 5px;
       }
       .timeBar {
-        width: calc(70vh + 22px);
+        width: 100%;
         height: 10px;
         margin-top: 10px;
         overflow: hidden;
@@ -188,6 +193,34 @@
         }
         100% {
           width: 100%;
+        }
+      }
+      @media only screen and (max-width: 540px) { 
+        html {
+          font-size: 9px;
+        }
+        .infoBar {
+          width: 70vw;
+        }
+        .life {
+          width: 5px;
+          padding-top: 5px;
+        }
+        .mode {
+          width: 10px;
+          padding-top: 10px;
+        }
+        .moon {
+          box-shadow: inset -3px -3px #333;
+        }
+        .mode::before {
+          left: -50px;
+          width: 50px;
+        }
+        .gameStart ,
+        .colorPlate {
+          width: 70vw;
+          height: 70vw;
         }
       }
     </style>
@@ -232,9 +265,10 @@
         this.level = 1;
         this.life = this.lives.length;
         this.blockNum = 0;
+        this.timer = 5000;
         this.timeStop = true;
         this.count;
-        this.keep;
+        this.countKeep;
         this.colorCardHtml = data;
       }
       // 隨機範圍內數字
@@ -288,7 +322,7 @@
         // blockNum開根號
         const blockNumSqrt = Math.sqrt(this.blockNum);
         // colorPlate的寬高除以blockNumSqrt減掉colorCard的margin
-        const colorCardSize = `calc((70vh / ${blockNumSqrt}) - 6px)`;
+        const colorCardSize = `calc((100% / ${blockNumSqrt}) - 6px)`;
         const color = this.randomColor(this.level);
         const colorCards = document.querySelectorAll(this.colorCard);
         colorCards.forEach((colorCard) => {
@@ -350,7 +384,7 @@
         this.gameStart.childNodes[3].textContent = 'RESTART';
         // 刪除bar
         const bar = this.timeBar.childNodes[1];
-        if (bar) bar.parentNode.removeChild(bar);
+        bar && bar.parentNode.removeChild(bar);
         // 把 life 數還原
         this.lives.forEach((life) => life.classList.remove('dead'));
       }
@@ -365,19 +399,19 @@
           this.restartTimeBar();
           this.lifeDead();
           // 如果this.timeStop是false時，再執行計時器一次
-          if (!this.timeStop) this.count = setTimeout(timeUpdate, 5000);
+          if (!this.timeStop) this.count = setTimeout(timeUpdate, this.timer);
         };
         // 把計時器裝進去 this.count
-        this.count = setTimeout(timeUpdate, 5000);
+        this.count = setTimeout(timeUpdate, this.timer);
       }
       // 創造遊戲
       Game.prototype.gameCreate = function() {
         // 更新levelTitle的關卡數字
         this.levelTitle.dataset.level = this.level;
         // 如果過5秒沒更新遊戲，那就把this.timeStop變成false
-        clearTimeout(this.keep);
+        clearTimeout(this.countKeep);
         this.timeStop = true;
-        this.keep = setTimeout(()=>{this.timeStop = false;}, 4999);
+        this.countKeep = setTimeout(() => {this.timeStop = false}, this.timer - 1);
         // 產生方塊的html
         this.htmlCreate();
         this.colorCardUpdate();
@@ -402,7 +436,7 @@
           // 錯誤時少一條命直到沒命
           this.lifeDead();
           // 呼叫遊戲失敗畫面
-          if (this.life <= 0) this.changeFail();
+          this.life <= 0 && this.changeFail();
         };
       }
       // 按到遊戲開始的執行
